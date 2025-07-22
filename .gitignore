@@ -1,3 +1,6 @@
 .vscode
 02_express/node_modules
 02_express/app.log
+vidTube/.env
+vidTube/node_modules
+vidTube/src/.env
