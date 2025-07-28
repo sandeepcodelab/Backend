@@ -167,6 +167,12 @@ const loginUser = asyncHandler( async(req, res) => {
 })
 
 
+const logoutUser = asyncHandler( async(req, res) => {
+    await User.findByIdAndUpdate(
+        // TODO: need to come back here after middleware
+    )
+})
+
 const refreshAccessToken = asyncHandler( async(req, res) => {
 
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
