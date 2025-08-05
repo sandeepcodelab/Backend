@@ -13,7 +13,7 @@ const PORT = process.env.PORT||8001
 dbConnect().then(() => {
     
     app.listen(PORT, () => {
-        console.log(`Server is listening on port: ${PORT}`)
+        console.log(`Server is listening at port: http://localhost:${PORT}`)
     })
     
 }).catch((err) => {
