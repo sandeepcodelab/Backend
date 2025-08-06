@@ -1,9 +1,10 @@
 import express from "express";
 
 // Import Router
-import createUserRouter from "./routes/userRoutes.js"
-import allUsersRouter from "./routes/userRoutes.js"
-import singleUserRouter from "./routes/userRoutes.js"
+import createUserRouter from "./routes/userRoutes.js";
+import allUsersRouter from "./routes/userRoutes.js";
+import singleUserRouter from "./routes/userRoutes.js";
+import updateUserRouter from "./routes/userRoutes.js";
 
 
 const app = express()
@@ -18,6 +19,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1/user", createUserRouter);
 app.use("/api/v1/user", allUsersRouter);
-app.use("api/v1/user", singleUserRouter)
+app.use("api/v1/user", singleUserRouter);
+app.use("/api/v1/user", updateUserRouter);
 
 export { app }
