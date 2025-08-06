@@ -102,4 +102,67 @@ const singleUser = asyncHandler( async (req, res) => {
 })
 
 
-export { createUser, getAllUsers, singleUser }
+const updateUser = asyncHandler( async (req, res) => {
+
+    const userID = req.params.id
+    
+    if(!userID){
+        return res.status(400).json({
+            success: false,
+            message: "User id is required"
+        })
+    }
+
+    if(!req.body || Object.keys(req.body).length === 0){
+        return res.status(400).json({
+            success: false,
+            message: "Body cannot be empty"
+        })
+    }
+
+    const {firstname, lastname, password} = req.body
+
+    if(!firstname || firstname.trim() === "" && !lastname || lastname.trim() === ""){
+        return res.status(400).json({
+            success: false,
+            message: "All fields are required",
+        })
+    }
+
+    if(req.body.hasOwnProperty("password")){
+        if (!password || password.trim() === "") {
+
+            return res.status(400).json({
+                success: false,
+                message: "Password is required",
+            })
+        }
+    }
+
+    const user = await User.findById(userID)
+
+    if(!user){
+        return res.status(404).json({
+                success: false,
+                message: "User not found",
+            })
+    }
+
+    user.firstname = firstname;
+    user.lastname = lastname;
+    user.password = password;
+
+    await user.save();
+
+    const userData = user.toObject();
+    delete userData.password
+
+    return res.status(200).json({
+            success: true,
+            message: "User updated successfully",
+            userData
+        })
+})
+
+
+export { createUser, getAllUsers, singleUser, updateUser }
