@@ -56,4 +56,50 @@ const createUser = asyncHandler( async (req, res) => {
 })
 
 
-export { createUser }
+const getAllUsers = asyncHandler( async (req, res) => {
+
+    const allUsers = await User.find().select("-password")
+
+    if(!allUsers){
+        return res.status(404).json({
+            success: false,
+            message: "Not found",
+        })
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: "Users fetched successfully",
+        users: allUsers
+    })
+})
+
+
+const singleUser = asyncHandler( async (req, res) => {
+
+    const userID = req.params.id
+    if(!userID){
+        return res.status(400).json({
+            success: false,
+            message: "User id is required",
+        })
+    }
+    
+    const user = await User.findById(userID).select("-password")
+    if(!user){
+        return res.status(404).json({
+            success: false,
+            message: "User not found",
+        })
+    }
+    
+    return res.status(200).json({
+        success: true,
+        message: "User fetched successfully",
+        user: user
+    })
+    
+})
+
+
+export { createUser, getAllUsers, singleUser }
