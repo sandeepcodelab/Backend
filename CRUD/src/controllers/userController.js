@@ -165,4 +165,24 @@ const updateUser = asyncHandler( async (req, res) => {
 })
 
 
-export { createUser, getAllUsers, singleUser, updateUser }
+const deleteUser = asyncHandler( async (req, res) => {
+    
+    const {userId} = req.params;
+
+    if(!userId){
+        return res.status(400).json({
+            success: false,
+            message: "User id is required"
+        })
+    }
+
+    const user = await User.findByIdAndDelete(userId)
+    
+    return res.status(200).json({
+        success: true,
+        message: "User deleted successfully"
+    })
+    
+})
+
+export { createUser, getAllUsers, singleUser, updateUser, deleteUser }
