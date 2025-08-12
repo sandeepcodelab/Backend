@@ -246,11 +246,20 @@ const refreshAccessToken = asyncHandler( async(req, res) => {
 
 const changeCurrentPassword = asyncHandler( async(req, res) => {
 
+    if(!req.body || Object.keys(req.body).length === 0){
+        throw new ApiError(400, "Request body cannot be empty");
+        
+    }
+
     const {oldPassword, newPassword} = req.body
 
-    const user = await User.findById(req.user?._id)
-    const isPasswordValid = user.isPasswordCorrect(oldPassword)
+    if(!oldPassword || !newPassword){
+        throw new ApiError(401, "Old and new passwords are required");
+    }
 
+    const user = await User.findById(req.user?._id)
+    const isPasswordValid = await user.isPasswordCorrect(oldPassword)
+    
     if(!isPasswordValid){
         throw new ApiError(401, "Old password is incorrect");
     }
@@ -260,7 +269,7 @@ const changeCurrentPassword = asyncHandler( async(req, res) => {
     await user.save({validateBeforeSave: false})
 
     return res.status(200)
-                .json( new ApiResponse(200, {}, "Password changed successfully"))
+                .json( new ApiResponse(200, {newPassword}, "Password changed successfully"))
 })
 
 
