@@ -5,6 +5,7 @@ import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import fs from "fs";
 
 
 const generateAccessAndRefreshToken = async(userId) => {
@@ -24,7 +25,7 @@ const generateAccessAndRefreshToken = async(userId) => {
 
     } catch (error) {
         
-        throw new ApiError(500, "Somthing went wrong while gaenerating access and refresh tokens");
+        throw new ApiError(500, "Somthing went wrong while generating access and refresh tokens");
         
     }
      
@@ -33,7 +34,7 @@ const generateAccessAndRefreshToken = async(userId) => {
 
 const registerUser = asyncHandler( async (req, res) => {
 
-    if(Object.keys(req.body).length === 0){
+    if(!req.body || Object.keys(req.body).length === 0){
         throw new ApiError(400, "Request body cannot be empty");
         
     }
@@ -46,28 +47,26 @@ const registerUser = asyncHandler( async (req, res) => {
         
     }
 
+    // Image path
+    const avatarLocalPath = req.files?.avatar?.[0]?.path
+    const coverImageLocalPath = req.files?.coverImage?.[0]?.path
+
     const existedUser = await User.findOne({
         $or: [{username}, {email}]
     })
 
     if(existedUser){
+        fs.unlinkSync(avatarLocalPath)
+        fs.unlinkSync(coverImageLocalPath)
         throw new ApiError(409, "User with email or username already exists");
-        
     }
 
-    const avatarLocalPath = req.files?.avatar?.[0]?.path
-    const coverImageLocalPath = req.files?.coverImage?.[0]?.path
 
     if(!avatarLocalPath){
         throw new ApiError(400, "Avatar file is missing");
         
     }
 
-    // const avatar = await uploadOnCloudinary(avatarLocalPath)
-    // let coverImage = ""
-    // if(coverImageLocalPath){
-    //     coverImage = await uploadOnCloudinary(coverImageLocalPath)
-    // }
 
     let avatar;
     try {
@@ -122,15 +121,17 @@ const registerUser = asyncHandler( async (req, res) => {
 
 
 const loginUser = asyncHandler( async(req, res) => {
-    if(Object.keys(req.body).length === 0){
-        throw new ApiError(400, "Request body cannot be empty");   
+
+    if(!req.body || Object.keys(req.body).length === 0){
+        throw new ApiError(400, "Request body cannot be empty");
+        
     }
 
     const {email, username, password} = req.body
 
     // Validation
-    if(!email){
-        throw new ApiError(400, "Email is required");
+    if(!email || !username){
+        throw new ApiError(400, "Username or Email is required");
     }
 
     const user = await User.findOne({
@@ -139,6 +140,11 @@ const loginUser = asyncHandler( async(req, res) => {
 
     if(!user){
         throw new ApiError(404, "User not found");
+    }
+
+    // Validation
+    if(!password){
+        throw new ApiError(400, "Password is required");
     }
 
     // ValidatePassword
