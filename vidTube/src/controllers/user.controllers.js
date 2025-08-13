@@ -56,8 +56,15 @@ const registerUser = asyncHandler( async (req, res) => {
     })
 
     if(existedUser){
-        fs.unlinkSync(avatarLocalPath)
-        fs.unlinkSync(coverImageLocalPath)
+        
+        if(avatarLocalPath){
+            fs.unlinkSync(avatarLocalPath)
+        }
+
+        if(coverImageLocalPath){
+            fs.unlinkSync(coverImageLocalPath)
+        }
+
         throw new ApiError(409, "User with email or username already exists");
     }
 
@@ -314,7 +321,7 @@ const updateAccountDetails = asyncHandler( async(req, res) => {
 
 const updateUserAvatar = asyncHandler( async(req, res) => {
     
-    const avatarLocalPath = req.file?.avatar?.[0].path
+    const avatarLocalPath = req.file?.path
     
     if (!avatarLocalPath) {
         throw new ApiError(400, "File is required");
@@ -326,8 +333,18 @@ const updateUserAvatar = asyncHandler( async(req, res) => {
         throw new ApiError(500, "Something went wrong while uploading avatar");
     }
 
+    const oldAvatar = req.user?.avatar
+
+    if(oldAvatar){
+        const match = oldAvatar.match(/\/(vidTube\/[^.]+)\./);
+        const public_id = match ? match[1] : null;
+
+        await deleteFromCloudinary(public_id) 
+    }
+
+
     const user = await User.findByIdAndUpdate(
-        res.user?._id,
+        req.user?._id,
         {
             $set: {
                 avatar: avatar.url
