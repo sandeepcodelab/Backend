@@ -282,9 +282,15 @@ const getCurrentUser = asyncHandler( async(req, res) => {
 
 const updateAccountDetails = asyncHandler( async(req, res) => {
 
+    if(!req.body || Object.keys(req.body).length === 0){
+        throw new ApiError(400, "Request body cannot be empty");
+        
+    }
+
+
     const {username, email, fullname} = req.body
 
-    if (!username || !email || fullname) {
+    if (!username || !email || !fullname) {
         throw new ApiError(400, "Username, email and fullname are required");
     }
     
@@ -297,7 +303,7 @@ const updateAccountDetails = asyncHandler( async(req, res) => {
                 fullname
             }
         },
-        {new: ture}
+        {new: true}
         
     ).select("-password -refreshToken")
     
