@@ -361,7 +361,7 @@ const updateUserAvatar = asyncHandler( async(req, res) => {
 
 const updateUserCoverImage = asyncHandler( async(req, res) => {
     
-    const coverImageLocalPath = req.file?.coverImage?.[0].path
+    const coverImageLocalPath = req.file?.path
     
     if (!coverImageLocalPath) {
         throw new ApiError(400, "File is required");
@@ -373,8 +373,17 @@ const updateUserCoverImage = asyncHandler( async(req, res) => {
         throw new ApiError(500, "Something went wrong while uploading cover image");
     }
 
+    const oldCoverImage = req.user.coverImage
+
+    if(oldCoverImage){
+        const match = oldCoverImage.match(/\/(vidTube\/[^.]+)\./);
+        const public_id = match ? match[1] : null;
+
+        await deleteFromCloudinary(public_id) 
+    }
+
     const user = await User.findByIdAndUpdate(
-        res.user?._id,
+        req.user?._id,
         {
             $set: {
                 coverImage: coverImage.url
